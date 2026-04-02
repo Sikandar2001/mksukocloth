@@ -79,7 +79,7 @@ export default function WomenItemsPage() {
     : PRODUCTS.filter(p => p.category === activeCategory);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 bg-white">
+    <main className="mx-auto max-w-7xl px-4 py-10 bg-white font-lexend">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">WOMEN'S COLLECTION</h1>

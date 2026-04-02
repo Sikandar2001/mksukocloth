@@ -30,9 +30,9 @@ export default function Header() {
   }, [open]);
 
   return (
-    <header className="w-full border-b border-black/10">
+    <header className="w-full border-b border-black/10 font-lexend">
       <div className="relative mx-auto flex h-14 max-w-7xl items-center px-4">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           <button
             aria-label="Menu"
             onClick={() => setOpen((v) => !v)}
@@ -44,11 +44,12 @@ export default function Header() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-5"
+              className="size-5 sm:size-6"
             >
               <path strokeLinecap="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
             </svg>
           </button>
+          
           <nav className="hidden items-center gap-8 sm:flex">
             <Link 
               href="/" 
@@ -86,29 +87,32 @@ export default function Header() {
           </nav>
         </div>
 
-        <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none text-2xl font-black tracking-[0.3em] text-black">
-          SNITCH
+        <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none flex flex-col items-center leading-none text-black">
+          <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">MKSUKO</span>
+          <span className="text-[10px] font-light tracking-[0.4em] uppercase sm:text-xs">Luxe</span>
         </Link>
 
-        <div className="ml-auto flex items-center gap-5 text-sm">
-          <button className="inline-flex items-center gap-1 rounded px-1 py-0.5 hover:bg-black/5">
+        <div className="ml-auto flex items-center gap-2 sm:gap-5 text-sm">
+          <button className="inline-flex items-center gap-1 rounded p-1 hover:bg-black/5 sm:px-1 sm:py-0.5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-4"
+              className="size-5"
             >
               <circle cx="11" cy="11" r="7" />
               <path d="M20 20l-3.5-3.5" />
             </svg>
             <span className="hidden sm:inline">search</span>
           </button>
-          <span className="font-semibold">EN</span>
+          
+          <span className="hidden font-semibold sm:inline">EN</span>
+          
           <Link 
             href={user ? "/profile" : "/login"} 
-            className={`rounded p-1 transition-colors hover:bg-black/5 ${user ? "text-black" : "text-zinc-600"}`} 
+            className={`hidden rounded p-1 transition-colors hover:bg-black/5 sm:block ${user ? "text-black" : "text-zinc-600"}`} 
             aria-label={user ? "Profile" : "Account login"}
           >
             <svg
@@ -117,12 +121,13 @@ export default function Header() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-5"
+              className="size-5 sm:size-6"
             >
               <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z" />
               <path d="M3 21a9 9 0 0 1 18 0" />
             </svg>
           </Link>
+          
           <button className="rounded p-1 hover:bg-black/5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -130,11 +135,12 @@ export default function Header() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-5"
+              className="size-5 sm:size-6"
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" />
             </svg>
           </button>
+          
           <Link href="/cart" className="relative rounded p-1 hover:bg-black/5" aria-label="Cart">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -142,7 +148,7 @@ export default function Header() {
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
-              className="size-5"
+              className="size-5 sm:size-6"
             >
               <path d="M6 6h15l-1.5 9H7.5L6 6Z" />
               <path d="M6 6H4" />

@@ -1,82 +1,63 @@
 "use client";
 import Link from "next/link";
 import ProductCard from "../../components/ProductCard";
-import { useState } from "react";
-
-const PRODUCTS = [
-  {
-    id: "w1",
-    title: "Linen Series Summer Dress",
-    price: "₹2499",
-    image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#FFFFFF", "#F5F5DC", "#E6E6FA"],
-    href: "/product/women-linen-dress",
-    category: "shirts", // Mapping dresses to shirts for now as placeholder
-  },
-  {
-    id: "w2",
-    title: "High-Waisted Utility Trousers",
-    price: "₹1999",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#4B5320", "#000000", "#5C4033"],
-    href: "/product/women-utility-trousers",
-    category: "trousers",
-  },
-  {
-    id: "w3",
-    title: "Oversized Denim Shirt",
-    price: "₹1899",
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#1D3A6C", "#4A6FA5"],
-    href: "/product/women-denim-shirt",
-    category: "shirts",
-  },
-  {
-    id: "w4",
-    title: "Graphic Boxy Tee",
-    price: "₹999",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15cf70449?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#000000", "#FFFFFF"],
-    href: "/product/women-boxy-tee",
-    category: "t-shirts",
-  },
-  {
-    id: "w5",
-    title: "Wide Leg Blue Jeans",
-    price: "₹2199",
-    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#1D3A6C"],
-    href: "/product/women-wide-jeans",
-    category: "jeans",
-  },
-  {
-    id: "w6",
-    title: "Retro Sunglasses",
-    price: "₹1299",
-    image: "https://images.unsplash.com/photo-1511499767390-90342f16b147?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#000000"],
-    href: "/product/women-retro-sunglasses",
-    category: "sunglasses",
-  },
-];
+import { useState, useEffect } from "react";
+import { db } from "@/app/lib/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const CATEGORIES = [
   { id: 'all', label: 'ALL' },
-  { id: 'shirts', label: 'SHIRTS' },
-  { id: 'jeans', label: 'JEANS' },
-  { id: 'trousers', label: 'TROUSERS' },
-  { id: 'sunglasses', label: 'SUNGLASSES' },
+  { id: 'dresses', label: 'DRESSES' },
+  { id: 'tops-blouses', label: 'TOPS & BLOUSES' },
   { id: 't-shirts', label: 'T-SHIRTS' },
-  { id: 'jackets', label: 'JACKETS' },
-  { id: 'shoes', label: 'SHOES' },
+  { id: 'bottoms', label: 'BOTTOMS' },
+  { id: 'co-ords', label: 'CO-ORDS' },
+  { id: 'denim', label: 'DENIM' },
+  { id: 'loungewear', label: 'LOUNGEWEAR' },
 ];
 
 export default function WomenItemsPage() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const womenCategoryIds = CATEGORIES.filter(cat => cat.id !== 'all').map(cat => cat.id.toUpperCase());
+    const allWomenCategories = ["woman", "women", ...womenCategoryIds];
+
+    const q = query(collection(db, "products"), where("category", "in", allWomenCategories));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedProducts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.name || data.title || "",
+          price: `₹${data.discountPrice || data.originalPrice || "0"}`,
+          image: data.images?.[0] || "",
+          hoverImage: data.images?.[1] || data.images?.[0] || "",
+          swatches: data.images || [],
+          href: `/product/${data.slug || doc.id}`,
+          category: data.category || "all",
+        };
+      });
+      setProducts(fetchedProducts);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const filteredProducts = activeCategory === 'all' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === activeCategory);
+    ? products 
+    : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="size-12 animate-spin rounded-full border-4 border-black border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 bg-white font-lexend">

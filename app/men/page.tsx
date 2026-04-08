@@ -1,82 +1,9 @@
 "use client";
 import Link from "next/link";
 import ProductCard from "../../components/ProductCard";
-import { useState } from "react";
-
-const PRODUCTS = [
-  {
-    id: "m1",
-    title: "Linen Blend Relaxed Fit Trousers",
-    price: "₹1899",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#1D3A6C", "#FDE3D2", "#5C4033"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "trousers",
-  },
-  {
-    id: "m2",
-    title: "Oversized Graphic Cotton Tee",
-    price: "₹1299",
-    image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#000000", "#FFFFFF", "#FF0000"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "t-shirts",
-  },
-  {
-    id: "m3",
-    title: "Utility Cargo Pants",
-    price: "₹2499",
-    image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#4B5320", "#000000"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "trousers",
-  },
-  {
-    id: "m4",
-    title: "Linen Series Casual Shirt",
-    price: "₹1699",
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#FFFFFF", "#87CEEB", "#F5F5DC"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "shirts",
-  },
-  {
-    id: "m5",
-    title: "Classic White Sneakers",
-    price: "₹2999",
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#FFFFFF"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "shoes",
-  },
-  {
-    id: "m6",
-    title: "Denim Trucker Jacket",
-    price: "₹3499",
-    image: "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#1D3A6C", "#4A6FA5"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "jackets",
-  },
-  {
-    id: "m7",
-    title: "Slim Fit Blue Jeans",
-    price: "₹2499",
-    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#1D3A6C"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "jeans",
-  },
-  {
-    id: "m8",
-    title: "Classic Aviator Sunglasses",
-    price: "₹1499",
-    image: "https://images.unsplash.com/photo-1511499767390-90342f16b147?q=80&w=800&auto=format&fit=crop",
-    swatches: ["#000000"],
-    href: "/product/deck-2.0-high-loose-jeans",
-    category: "sunglasses",
-  },
-];
+import { useState, useEffect } from "react";
+import { db } from "@/app/lib/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 
 const CATEGORIES = [
   { id: 'all', label: 'ALL' },
@@ -91,10 +18,43 @@ const CATEGORIES = [
 
 export default function MenItemsPage() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const q = query(collection(db, "products"), where("category", "in", ["man", "men"]));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedProducts = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.name || data.title || "",
+          price: `₹${data.discountPrice || data.originalPrice || "0"}`,
+          image: data.images?.[0] || "",
+          hoverImage: data.images?.[1] || data.images?.[0] || "",
+          swatches: data.images || [], // Use images for card thumbnails
+          href: `/product/${data.slug || doc.id}`,
+          category: data.subCategory || "all",
+        };
+      });
+      setProducts(fetchedProducts);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const filteredProducts = activeCategory === 'all' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === activeCategory);
+    ? products 
+    : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="size-12 animate-spin rounded-full border-4 border-black border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 bg-white font-lexend">

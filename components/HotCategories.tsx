@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { db } from '@/app/lib/firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
+import Link from 'next/link';
 
 interface Category {
   id?: string;
   name: string;
-  img?: string;
+  image?: string;
   gender?: 'men' | 'women' | string;
   order?: number;
 }
@@ -17,11 +18,24 @@ interface CategoryItemProps {
 }
 
 const CategoryItem = ({ category }: CategoryItemProps) => {
-  // Use a fallback image if 'img' is missing
-  const displayImg = category.img || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=300&auto=format&fit=crop';
+  // Use a fallback image if 'image' is missing
+  const displayImg = category.image || 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=300&auto=format&fit=crop';
   
+  // Determine link based on gender or name fallback
+  const gender = category.gender?.toLowerCase() || "";
+  const name = category.name?.toLowerCase() || "";
+  
+  // Robust check for women categories
+  const isWomen = gender === 'women' || gender === 'woman' || name.includes('women') || name.includes('woman');
+  const isMen = gender === 'men' || gender === 'man' || name.includes('men') || name.includes('man');
+
+  const href = isWomen ? '/women' : isMen ? '/men' : '/men';
+
   return (
-    <div className="flex flex-col items-center min-w-[120px] flex-shrink-0 sm:min-w-0 group cursor-pointer lg:w-[15%]">
+    <Link 
+      href={href}
+      className="flex flex-col items-center min-w-[120px] flex-shrink-0 sm:min-w-0 group cursor-pointer lg:w-[15%]"
+    >
       <div className="relative w-full aspect-[4/5] overflow-hidden rounded-t-full bg-gradient-to-b from-[#FFE6F2] via-[#FFF5F9] to-white flex items-center justify-center p-2 transition-transform group-hover:scale-105 border border-pink-50/50 shadow-sm">
         {/* Sparkles placeholder */}
         <div className="absolute top-4 left-3 text-pink-300 opacity-60 text-[10px]">✦</div>
@@ -37,7 +51,7 @@ const CategoryItem = ({ category }: CategoryItemProps) => {
       <p className="mt-3 text-center text-[10px] font-black tracking-widest uppercase text-zinc-900 sm:text-xs">
         {category.name}
       </p>
-    </div>
+    </Link>
   );
 };
 
@@ -94,7 +108,7 @@ const HotCategories = () => {
           No categories found in Admin Panel.
         </p>
         <p className="text-xs text-zinc-300 mt-2">
-          Add documents to the 'categories' collection in Firestore with fields: name, img, gender.
+          Add documents to the 'categories' collection in Firestore with fields: name, image, gender.
         </p>
       </section>
     );

@@ -1,8 +1,67 @@
+"use client";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import HotCategories from "@/components/HotCategories";
+import { useState, useEffect } from "react";
+import { db } from "@/app/lib/firebase";
+import { collection, onSnapshot, query, where, limit } from "firebase/firestore";
 
 export default function Home() {
+  const [menProducts, setMenProducts] = useState<any[]>([]);
+  const [womenProducts, setWomenProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch Men's products
+    const menQ = query(
+      collection(db, "products"),
+      where("category", "in", ["man", "men"]),
+      limit(4)
+    );
+    const unsubscribeMen = onSnapshot(menQ, (snapshot) => {
+      const fetched = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.name || data.title || "",
+          price: `₹${data.discountPrice || data.originalPrice || "0"}`,
+          image: data.images?.[0] || "",
+          hoverImage: data.images?.[1] || data.images?.[0] || "",
+          swatches: data.images || [],
+          href: `/product/${data.slug || doc.id}`,
+        };
+      });
+      setMenProducts(fetched);
+    });
+
+    // Fetch Women's products
+    const womenQ = query(
+      collection(db, "products"),
+      where("category", "in", ["woman", "women"]),
+      limit(4)
+    );
+    const unsubscribeWomen = onSnapshot(womenQ, (snapshot) => {
+      const fetched = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.name || data.title || "",
+          price: `₹${data.discountPrice || data.originalPrice || "0"}`,
+          image: data.images?.[0] || "",
+          hoverImage: data.images?.[1] || data.images?.[0] || "",
+          swatches: data.images || [],
+          href: `/product/${data.slug || doc.id}`,
+        };
+      });
+      setWomenProducts(fetched);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribeMen();
+      unsubscribeWomen();
+    };
+  }, []);
   return (
     <main className="w-full bg-white font-lexend">
       {/* Hero Section - Inspired by Snitch */}
@@ -182,13 +241,13 @@ export default function Home() {
           <div className="flex gap-3 min-w-max">
             {[
               { id: 'all', label: 'ALL', active: true },
-              { id: 'shirts', label: 'SHIRTS' },
-              { id: 'jeans', label: 'JEANS' },
-              { id: 'trousers', label: 'TROUSERS' },
-              { id: 'sunglasses', label: 'SUNGLASSES' },
+              { id: 'dresses', label: 'DRESSES' },
+              { id: 'tops-blouses', label: 'TOPS & BLOUSES' },
               { id: 't-shirts', label: 'T-SHIRTS' },
-              { id: 'jackets', label: 'JACKETS' },
-              { id: 'shoes', label: 'SHOES' },
+              { id: 'bottoms', label: 'BOTTOMS' },
+              { id: 'co-ords', label: 'CO-ORDS' },
+              { id: 'denim', label: 'DENIM' },
+              { id: 'loungewear', label: 'LOUNGEWEAR' },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -205,14 +264,14 @@ export default function Home() {
         </div>
         
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { id: "m1", title: "Linen Blend Relaxed Fit Trousers", price: "₹1899", image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?q=80&w=800&auto=format&fit=crop", swatches: ["#1D3A6C", "#FDE3D2", "#5C4033"], href: "/product/deck-2.0-high-loose-jeans" },
-            { id: "m2", title: "Oversized Graphic Cotton Tee", price: "₹1299", image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=800&auto=format&fit=crop", swatches: ["#000000", "#FFFFFF", "#FF0000"], href: "/product/deck-2.0-high-loose-jeans" },
-            { id: "m3", title: "Utility Cargo Pants", price: "₹2499", image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=800&auto=format&fit=crop", swatches: ["#4B5320", "#000000"], href: "/product/deck-2.0-high-loose-jeans" },
-            { id: "m4", title: "Linen Series Casual Shirt", price: "₹1699", image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?q=80&w=800&auto=format&fit=crop", swatches: ["#FFFFFF", "#87CEEB", "#F5F5DC"], href: "/product/deck-2.0-high-loose-jeans" },
-          ].map((p) => (
+          {menProducts.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
+          {menProducts.length === 0 && !loading && (
+            <div className="col-span-full py-10 text-center text-zinc-400">
+              No men's products found.
+            </div>
+          )}
         </div>
       </section>
 
@@ -252,14 +311,14 @@ export default function Home() {
         </div>
         
         <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { id: "w1", title: "Linen Series Summer Dress", price: "₹2499", image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=800&auto=format&fit=crop", swatches: ["#FFFFFF", "#F5F5DC", "#E6E6FA"], href: "/women" },
-            { id: "w2", title: "High-Waisted Utility Trousers", price: "₹1999", image: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop", swatches: ["#4B5320", "#000000", "#5C4033"], href: "/women" },
-            { id: "w3", title: "Oversized Denim Shirt", price: "₹1899", image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop", swatches: ["#1D3A6C", "#4A6FA5"], href: "/women" },
-            { id: "w4", title: "Graphic Boxy Tee", price: "₹999", image: "https://images.unsplash.com/photo-1503342217505-b0a15cf70449?q=80&w=800&auto=format&fit=crop", swatches: ["#000000", "#FFFFFF"], href: "/women" },
-          ].map((p) => (
+          {womenProducts.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
+          {womenProducts.length === 0 && !loading && (
+            <div className="col-span-full py-10 text-center text-zinc-400">
+              No women's products found.
+            </div>
+          )}
         </div>
       </section>
 

@@ -10,12 +10,14 @@ type Product = {
   href?: string;
 };
 
+import { useState } from "react";
 import Link from "next/link";
 import { useWishlist } from "@/app/context/WishlistContext";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isFavorite = isInWishlist(product.id);
+  const [currentImage, setCurrentImage] = useState(product.image);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,23 +31,45 @@ export default function ProductCard({ product }: { product: Product }) {
     });
   };
 
+  const handleSwatchClick = (e: React.MouseEvent, img: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImage(img);
+  };
+
   return (
     <div className="group relative">
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F5F5F5] rounded-none">
         {product.href ? (
-          <Link href={product.href} className="block h-full">
+          <Link href={product.href} className="block h-full relative">
             <img
-              src={product.image}
+              src={currentImage}
               alt={product.title}
-              className="h-full w-full object-cover"
+              className={`h-full w-full object-cover transition-opacity duration-500 ${product.hoverImage && currentImage === product.image ? 'group-hover:opacity-0' : ''}`}
             />
+            {product.hoverImage && currentImage === product.image && (
+              <img
+                src={product.hoverImage}
+                alt={product.title}
+                className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+            )}
           </Link>
         ) : (
-          <img
-            src={product.image}
-            alt={product.title}
-            className="h-full w-full object-cover"
-          />
+          <div className="relative h-full">
+            <img
+              src={currentImage}
+              alt={product.title}
+              className={`h-full w-full object-cover transition-opacity duration-500 ${product.hoverImage && currentImage === product.image ? 'group-hover:opacity-0' : ''}`}
+            />
+            {product.hoverImage && currentImage === product.image && (
+              <img
+                src={product.hoverImage}
+                alt={product.title}
+                className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              />
+            )}
+          </div>
         )}
         
         {/* Wishlist Button - Top Right Clean Outline */}
@@ -92,18 +116,17 @@ export default function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
         
-        {product.swatches && product.swatches.length > 0 && (
-          <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-            {product.swatches.slice(0, 3).map((color, i) => (
+        {product.swatches && product.swatches.length > 1 && (
+          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {product.swatches.map((img, i) => (
               <button
                 key={i}
-                className="size-4 border border-zinc-200 ring-1 ring-transparent ring-offset-1 transition-all hover:ring-zinc-400"
-                style={{ backgroundColor: color }}
-              />
+                onClick={(e) => handleSwatchClick(e, img)}
+                className={`relative size-10 flex-shrink-0 overflow-hidden border-2 transition-all ${currentImage === img ? 'border-black' : 'border-transparent hover:border-zinc-300'}`}
+              >
+                <img src={img} alt="" className="h-full w-full object-cover" />
+              </button>
             ))}
-            {product.swatches.length > 3 && (
-              <span className="text-[12px] font-medium text-zinc-500 ml-0.5">+{product.swatches.length - 3}</span>
-            )}
           </div>
         )}
       </div>

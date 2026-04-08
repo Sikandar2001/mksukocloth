@@ -115,20 +115,32 @@ export default function Header() {
             className={`hidden rounded p-1 transition-colors hover:bg-black/5 sm:block ${user ? "text-black" : "text-zinc-600"}`} 
             aria-label={user ? "Profile" : "Account login"}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="size-5 sm:size-6"
-            >
-              <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z" />
-              <path d="M3 21a9 9 0 0 1 18 0" />
-            </svg>
+            {user ? (
+              /* Logged in icon: Filled user circle or initials */
+              <div className="flex size-5 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white sm:size-6">
+                {user.displayName ? user.displayName[0].toUpperCase() : user.email ? user.email[0].toUpperCase() : "U"}
+              </div>
+            ) : (
+              /* Logged out icon: Outline user */
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="size-5 sm:size-6"
+              >
+                <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z" />
+                <path d="M3 21a9 9 0 0 1 18 0" />
+              </svg>
+            )}
           </Link>
           
-          <button className="rounded p-1 hover:bg-black/5">
+          <Link 
+            href="/profile/wishlist" 
+            className="rounded p-1 hover:bg-black/5"
+            aria-label="Wishlist"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -139,7 +151,7 @@ export default function Header() {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" />
             </svg>
-          </button>
+          </Link>
           
           <Link href="/cart" className="relative rounded p-1 hover:bg-black/5" aria-label="Cart">
             <svg

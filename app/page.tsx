@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import HotCategories from "@/components/HotCategories";
 
 export default function Home() {
   return (
@@ -37,6 +38,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* HOT CATEGORIES - Added based on user request */}
+      <HotCategories />
 
       {/* NEW: Live In Denim Slider Section (Full Width) */}
       <section className="mt-20 w-full font-lexend">

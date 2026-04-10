@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="mt-12 border-t border-black/10 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-10">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <div>
             <div className="text-sm font-extrabold tracking-wide text-zinc-900">CUSTOMER SERVICE</div>
             <ul className="mt-3 space-y-2 text-sm text-zinc-800">
@@ -70,20 +70,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-          <div>
-            <div className="text-sm font-extrabold tracking-wide text-zinc-900">CLUB‑G JOIN AND GET 15% OFF</div>
-            <p className="mt-2 text-sm text-zinc-700">
-              Join the inner circle and unlock the doors to our world of denim. From personal gifts and giveaways, to exclusive events and special services.
-            </p>
-            <div className="mt-3 flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your e-mail address"
-                className="min-w-0 flex-1 rounded border border-black/20 px-3 py-2 text-sm outline-none placeholder:text-zinc-400"
-              />
-              <button className="rounded bg-black px-4 py-2 text-sm font-medium text-white">subscribe</button>
-            </div>
-          </div>
         </div>
 
         <div className="mt-10 border-t border-black/10 pt-6">
@@ -109,13 +95,6 @@ export default function Footer() {
                   <path d="M20 8.2c-2 0-3.8-1-4.8-2.6v9.1A5.3 5.3 0 1 1 9.9 9.7v2.4A2.9 2.9 0 1 0 12.6 15V3h2.6a5.9 5.9 0 0 0 4.8 2.4v2.8z" />
                 </svg>
               </Link>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-zinc-700 sm:justify-end">
-              {["iDEAL", "Klarna", "PayPal", "American Express", "Mastercard", "VISA", "Apple Pay"].map((p) => (
-                <span key={p} className="rounded border border-black/15 px-2 py-1">
-                  {p}
-                </span>
-              ))}
             </div>
           </div>
         </div>

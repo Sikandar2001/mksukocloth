@@ -2,7 +2,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
@@ -21,7 +21,12 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 // Initialize Services
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Use initializeFirestore with experimentalForceLongPolling to prevent connection issues in some network environments
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
+
 const storage = getStorage(app);
 
 // Initialize Analytics (only on client side)

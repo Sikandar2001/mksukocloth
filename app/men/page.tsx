@@ -5,48 +5,143 @@ import { useState, useEffect } from "react";
 import { db } from "@/app/lib/firebase";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 
-const CATEGORIES = [
-  { id: 'all', label: 'ALL' },
-  { id: 'shirts', label: 'SHIRTS' },
-  { id: 'jeans', label: 'JEANS' },
-  { id: 'trousers', label: 'TROUSERS' },
-  { id: 'sunglasses', label: 'SUNGLASSES' },
-  { id: 't-shirts', label: 'T-SHIRTS' },
-  { id: 'jackets', label: 'JACKETS' },
-  { id: 'shoes', label: 'SHOES' },
-];
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function MenItemsPage() {
-  const [activeCategory, setActiveCategory] = useState('all');
+function MenItemsContent() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get('category');
+  const childParam = searchParams.get('child');
+  const [activeCategory, setActiveCategory] = useState(categoryParam?.toLowerCase() || 'all');
   const [products, setProducts] = useState<any[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<{id: string, label: string}[]>([]);
+  const [childSubCategories, setChildSubCategories] = useState<any[]>([]);
+  const [activeChildCategory, setActiveChildCategory] = useState<string | null>(childParam?.toLowerCase() || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "products"), where("category", "in", ["man", "men"]));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedProducts = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.name || data.title || "",
-          price: `₹${data.discountPrice || data.originalPrice || "0"}`,
-          image: data.images?.[0] || "",
-          hoverImage: data.images?.[1] || data.images?.[0] || "",
-          swatches: data.images || [], // Use images for card thumbnails
-          href: `/product/${data.slug || doc.id}`,
-          category: data.subCategory || "all",
-        };
-      });
-      setProducts(fetchedProducts);
-      setLoading(false);
-    });
+    if (categoryParam) {
+      setActiveCategory(categoryParam.toLowerCase());
+    }
+    if (childParam) {
+      setActiveChildCategory(childParam.toLowerCase());
+    }
+  }, [categoryParam, childParam]);
 
-    return () => unsubscribe();
+  useEffect(() => {
+    // Fetch categories, subcategories, and child-subcategories
+    const fetchFilters = async () => {
+      const catsQ = query(collection(db, "categories"));
+      const subCatsQ = query(collection(db, "subcategories"));
+      const childCatsQ = query(collection(db, "child-subcategories"));
+      
+      onSnapshot(catsQ, (catsSnapshot) => {
+        const allCats = catsSnapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          name: doc.data().name, 
+          gender: doc.data().gender?.toLowerCase() || '' 
+        }));
+        
+        const menCats = allCats.filter(cat => 
+          cat.gender === 'men' || cat.gender === 'man' || cat.gender === 'male' || cat.name.toLowerCase() === 'men'
+        );
+        const menCatIds = new Set(menCats.map(c => c.id));
+        const menCatNames = new Set(menCats.map(c => c.name.toLowerCase()));
+
+        onSnapshot(subCatsQ, (subSnapshot) => {
+          const allSubCats = subSnapshot.docs.map(doc => ({ 
+            id: doc.id, 
+            name: doc.data().name, 
+            categoryId: doc.data().categoryId 
+          }));
+          
+          const menSubCats = allSubCats.filter(sub => menCatIds.has(sub.categoryId));
+          const menSubCatIds = new Set(menSubCats.map(s => s.id));
+          const menSubCatNames = new Set(menSubCats.map(s => s.name.toLowerCase()));
+
+          onSnapshot(childCatsQ, (childSnapshot) => {
+            const allChildSubCats = childSnapshot.docs.map(doc => ({
+              id: doc.id,
+              name: doc.data().name,
+              subCategoryId: doc.data().subCategoryId
+            }));
+
+            const menChildSubCats = allChildSubCats.filter(child => menSubCatIds.has(child.subCategoryId));
+            setChildSubCategories(menChildSubCats);
+
+            // Update filter bar categories (Main categories and subcategories)
+            const combined = [
+              { id: 'all', label: 'ALL' }, 
+              ...menCats.map(c => ({ id: c.id, label: c.name })), 
+              ...menSubCats.map(s => ({ id: s.id, label: s.name }))
+            ];
+            
+            const unique = combined.reduce((acc: any[], current) => {
+              const labelLower = current.label.toLowerCase();
+              if (labelLower === 'bottom') return acc;
+              const x = acc.find(item => item.label.toLowerCase() === labelLower);
+              if (!x) return acc.concat([current]);
+              return acc;
+            }, []);
+            
+            setDynamicCategories(unique);
+
+            // Fetch and filter products dynamically
+            const productsQ = query(collection(db, "products"));
+            onSnapshot(productsQ, (prodSnapshot) => {
+              const fetchedProducts = prodSnapshot.docs.map((doc) => {
+                const data = doc.data();
+                return {
+                  id: doc.id,
+                  title: data.name || data.title || "",
+                  price: `₹${data.discountPrice || data.originalPrice || "0"}`,
+                  image: data.images?.[0] || "",
+                  hoverImage: data.images?.[1] || data.images?.[0] || "",
+                  swatches: data.images || [],
+                  href: `/product/${data.slug || doc.id}`,
+                  category: data.category || "all",
+                  subCategory: data.subCategory || "",
+                  childSubCategory: data.childSubCategory || "",
+                };
+              }).filter(p => {
+                const pCat = p.category.toLowerCase();
+                const pSub = p.subCategory.toLowerCase();
+                const pChild = p.childSubCategory.toLowerCase();
+                
+                const isExplicitlyMen = pCat === 'men' || pCat === 'man' || pCat === 'male';
+                const isInCategory = menCatNames.has(pCat);
+                const isInSubCategory = menSubCatNames.has(pSub);
+                const isInChildSubCategory = new Set(menChildSubCats.map(c => c.name.toLowerCase())).has(pChild);
+                
+                const isExplicitlyWomen = pCat === 'women' || pCat === 'woman' || pCat === 'female';
+                if (isExplicitlyWomen) return false;
+
+                return isExplicitlyMen || isInCategory || isInSubCategory || isInChildSubCategory;
+              });
+              setProducts(fetchedProducts);
+              setLoading(false);
+            });
+          });
+        });
+      });
+    };
+
+    fetchFilters();
   }, []);
 
   const filteredProducts = activeCategory === 'all' 
     ? products 
-    : products.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
+    : products.filter(p => {
+        const matchesCat = p.category.toLowerCase() === activeCategory.toLowerCase() || 
+                          p.subCategory?.toLowerCase() === activeCategory.toLowerCase();
+        
+        if (!activeChildCategory) return matchesCat;
+        
+        return matchesCat && p.childSubCategory?.toLowerCase() === activeChildCategory.toLowerCase();
+      });
+
+  const activeSubCatId = dynamicCategories.find(c => c.label.toLowerCase() === activeCategory.toLowerCase())?.id;
+  const currentChildSubCats = childSubCategories.filter(c => c.subCategoryId === activeSubCatId);
 
   if (loading) {
     return (
@@ -71,33 +166,59 @@ export default function MenItemsPage() {
             </svg>
             Filter
           </button>
-          <div className="relative group">
-            <button className="flex items-center gap-2 rounded-full border-2 border-zinc-200 px-6 py-2.5 text-xs font-black uppercase tracking-widest transition-all hover:border-black">
-              Sort: Relevance
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-              </svg>
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Category Filter - Matching Home Page Style */}
+      {/* Category Filter - Dynamic from Firestore */}
       <div className="mt-8 overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex gap-3 min-w-max">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-8 py-3 text-sm font-medium tracking-widest border border-black transition-all duration-300 ${
-                activeCategory === cat.id 
-                  ? 'bg-black text-white' 
-                  : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-3 min-w-max">
+            {dynamicCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setActiveCategory(cat.label.toLowerCase());
+                  setActiveChildCategory(null);
+                }}
+                className={`px-8 py-3 text-sm font-medium tracking-widest border border-black transition-all duration-300 uppercase ${
+                  activeCategory === cat.label.toLowerCase() 
+                    ? 'bg-black text-white' 
+                    : 'bg-white text-black hover:bg-black hover:text-white'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Child Category Filter Bar */}
+          {currentChildSubCats.length > 0 && (
+            <div className="flex gap-2 min-w-max animate-in fade-in slide-in-from-top-2 duration-300">
+              <button
+                onClick={() => setActiveChildCategory(null)}
+                className={`px-4 py-1.5 text-[10px] font-black tracking-widest uppercase rounded-full border transition-all ${
+                  activeChildCategory === null 
+                    ? 'bg-zinc-900 text-white border-zinc-900' 
+                    : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-900'
+                }`}
+              >
+                All {activeCategory}
+              </button>
+              {currentChildSubCats.map((child) => (
+                <button
+                  key={child.id}
+                  onClick={() => setActiveChildCategory(child.name.toLowerCase())}
+                  className={`px-4 py-1.5 text-[10px] font-black tracking-widest uppercase rounded-full border transition-all ${
+                    activeChildCategory === child.name.toLowerCase() 
+                      ? 'bg-zinc-900 text-white border-zinc-900' 
+                      : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-900'
+                  }`}
+                >
+                  {child.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -107,6 +228,18 @@ export default function MenItemsPage() {
         ))}
       </div>
     </main>
+  );
+}
+
+export default function MenItemsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="size-12 animate-spin rounded-full border-4 border-black border-t-transparent" />
+      </div>
+    }>
+      <MenItemsContent />
+    </Suspense>
   );
 }
 

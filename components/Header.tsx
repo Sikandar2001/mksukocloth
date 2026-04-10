@@ -89,7 +89,6 @@ export default function Header() {
 
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none flex flex-col items-center leading-none text-black">
           <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">MKSUKO</span>
-          <span className="text-[10px] font-light tracking-[0.4em] uppercase sm:text-xs">Luxe</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-5 text-sm">

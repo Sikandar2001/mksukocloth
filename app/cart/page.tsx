@@ -2,51 +2,20 @@
 import Link from 'next/link';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
-import { db } from '@/app/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, cartCount, clearCart } = useCart();
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!user) {
       router.push('/login');
       return;
     }
-
-    setLoading(true);
-    try {
-      // Create a single order document for the entire cart
-      // Or multiple documents? User said "add document ne oder id and add fild me item, quntity, price"
-      // Usually one order has multiple items. But to follow the prompt strictly:
-      
-      for (const item of cart) {
-        await addDoc(collection(db, 'orders'), {
-          userId: user.uid,
-          userEmail: user.email,
-          item: item.title,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image,
-          size: item.size,
-          createdAt: serverTimestamp(),
-          status: 'Processing'
-        });
-      }
-
-      clearCart();
-      router.push('/profile/orders');
-    } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    router.push('/payment');
   };
 
   return (
@@ -152,10 +121,9 @@ export default function CartPage() {
             </div>
             <button 
               onClick={handleCheckout}
-              disabled={loading}
               className="mt-8 w-full rounded-full bg-black py-5 text-sm font-black uppercase tracking-widest text-white transition-transform active:scale-95 shadow-xl disabled:bg-zinc-400 disabled:scale-100"
             >
-              {loading ? 'Processing...' : 'Checkout Now'}
+              Checkout Now
             </button>
           </aside>
         </div>

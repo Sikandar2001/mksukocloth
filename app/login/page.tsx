@@ -3,8 +3,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '@/app/lib/firebase';
-import { signInWithEmailAndPassword, signInWithRedirect, GoogleAuthProvider, getRedirectResult } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function LoginPage() {
@@ -14,44 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Check for redirect result when component mounts
-    const checkRedirect = async () => {
-      try {
-        setRedirecting(true);
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          // Save user data to Firestore
-          const userRef = doc(db, 'users', result.user.uid);
-          await setDoc(userRef, {
-            uid: result.user.uid,
-            name: result.user.displayName || 'Google User',
-            email: result.user.email,
-            photoURL: result.user.photoURL,
-            lastLogin: new Date(),
-          }, { merge: true });
-          
-          router.push('/');
-          return;
-        }
-      } catch (err: any) {
-        console.error('Redirect error:', err);
-        setError(err.message || 'Failed to complete Google login.');
-      } finally {
-        setRedirecting(false);
-      }
-    };
-    checkRedirect();
-
     if (!authLoading && user) {
       router.push('/profile');
     }
   }, [user, authLoading, router]);
 
-  if (authLoading || redirecting) {
+  if (authLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="size-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
@@ -80,9 +51,34 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError('');
-      await signInWithRedirect(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      
+      if (result.user) {
+        // Save user data to Firestore
+        const userRef = doc(db, 'users', result.user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+           await setDoc(userRef, {
+             uid: result.user.uid,
+             name: result.user.displayName || 'Google User',
+             email: result.user.email,
+             photoURL: result.user.photoURL,
+             createdAt: serverTimestamp(),
+             lastLogin: serverTimestamp(),
+           });
+         } else {
+           await setDoc(userRef, {
+             lastLogin: serverTimestamp(),
+           }, { merge: true });
+         }
+        
+        router.push('/');
+      }
     } catch (err: any) {
+      console.error('Google login error:', err);
       setError(err.message || 'Failed to log in with Google.');
+    } finally {
       setLoading(false);
     }
   };

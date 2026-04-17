@@ -107,6 +107,25 @@ export default function ProductDetailPage() {
     }, 1000);
   };
 
+  const handleBuyNow = () => {
+    if (!size) {
+      alert("Please select a size first!");
+      return;
+    }
+
+    addToCart({
+      id: data.id,
+      slug: slug as string,
+      title: data.title,
+      price: data.price,
+      image: data.images[0],
+      size: size,
+      quantity: 1
+    });
+
+    router.push('/cart');
+  };
+
   const nextImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setActiveImage((prev) => (prev + 1) % data.images.length);
@@ -317,7 +336,10 @@ export default function ProductDetailPage() {
             >
               {isAdding ? 'Added to Bag!' : 'Add to Bag'}
             </button>
-            <button className="w-full rounded-full border-2 border-black py-5 text-sm font-black uppercase tracking-[0.2em] text-black transition-transform active:scale-95">
+            <button 
+              onClick={handleBuyNow}
+              className="w-full rounded-full border-2 border-black py-5 text-sm font-black uppercase tracking-[0.2em] text-black transition-transform active:scale-95"
+            >
               Buy Now
             </button>
           </div>

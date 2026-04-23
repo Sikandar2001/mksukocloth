@@ -3,6 +3,7 @@ import { Lexend } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Preloader from "@/components/Preloader";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { WishlistProvider } from "./context/WishlistContext";
@@ -29,6 +30,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${lexend.variable} antialiased min-h-screen flex flex-col`}
       >
+        <Preloader />
         <AuthProvider>
           <WishlistProvider>
             <CartProvider>

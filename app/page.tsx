@@ -2,6 +2,7 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import HotCategories from "@/components/HotCategories";
+import HeroSlider from "@/components/HeroSlider";
 import { useState, useEffect } from "react";
 import { db } from "@/app/lib/firebase";
 import { collection, onSnapshot, query, where, limit } from "firebase/firestore";
@@ -182,39 +183,8 @@ export default function Home() {
       }).slice(0, 4);
   return (
     <main className="w-full bg-white font-lexend">
-      {/* Hero Section - Inspired by Snitch */}
-      <section className="relative mx-auto max-w-7xl overflow-hidden px-0 sm:px-4 mt-4">
-        <div className="relative aspect-[16/9] w-full sm:aspect-[16/7] lg:aspect-[21/9] overflow-hidden rounded-none sm:rounded-3xl">
-          <img
-            src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=2000&auto=format&fit=crop"
-            alt="SNITCH New Collection"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6">
-            <h1 className="text-5xl font-black tracking-tighter sm:text-8xl uppercase leading-none">
-              STREET <br className="sm:hidden" /> REBEL '26
-            </h1>
-            <p className="mt-4 text-lg font-bold tracking-widest uppercase opacity-90 sm:text-xl">
-              Limited Edition Summer Drop
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
-              <Link
-                href="/men"
-                className="w-full sm:w-auto rounded-full bg-white px-10 py-4 text-sm font-black uppercase tracking-widest text-black transition-all hover:scale-105 hover:bg-zinc-100"
-              >
-                Shop New Arrivals
-              </Link>
-              <Link
-                href="/men"
-                className="w-full sm:w-auto rounded-full border-2 border-white px-10 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-white hover:text-black"
-              >
-                Best Sellers
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero Section - Image Slider */}
+      <HeroSlider />
 
       {/* HOT CATEGORIES - Added based on user request */}
       <HotCategories />

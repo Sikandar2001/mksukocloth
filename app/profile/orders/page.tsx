@@ -103,6 +103,25 @@ export default function OrdersPage() {
               </svg>
               Track Orders
             </Link>
+            <Link
+              href="/profile/addresses"
+              className="flex items-center gap-3 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-zinc-500 hover:bg-zinc-50 hover:text-black transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              Delivery Addresses
+            </Link>
+            <Link
+              href="/profile/wishlist"
+              className="flex items-center gap-3 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-zinc-500 hover:bg-zinc-50 hover:text-black transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z" />
+              </svg>
+              My Wishlist
+            </Link>
           </nav>
         </aside>
 

@@ -47,6 +47,16 @@ export default function WishlistPage() {
               Track Orders
             </Link>
             <Link
+              href="/profile/addresses"
+              className="flex items-center gap-3 rounded-md px-4 py-3 text-sm font-bold uppercase tracking-wide text-zinc-500 hover:bg-zinc-50 hover:text-black transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+              Delivery Addresses
+            </Link>
+            <Link
               href="/profile/wishlist"
               className="flex items-center gap-3 rounded-md bg-zinc-100 px-4 py-3 text-sm font-bold uppercase tracking-wide text-black"
             >

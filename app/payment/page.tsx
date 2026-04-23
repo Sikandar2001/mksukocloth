@@ -4,14 +4,45 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/app/context/CartContext';
 import { useAuth } from '@/app/context/AuthContext';
 import { db } from '@/app/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import Link from 'next/link';
+import { useEffect } from 'react';
+
+interface Address {
+  id: string;
+  fullName: string;
+  phone: string;
+  addressLine: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
 
 export default function PaymentPage() {
   const { cart, cartCount, clearCart } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      const fetchAddresses = async () => {
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const userAddresses = docSnap.data().addresses || [];
+          setAddresses(userAddresses);
+          const defaultAddr = userAddresses.find((a: Address) => a.isDefault) || userAddresses[0];
+          setSelectedAddress(defaultAddr);
+        }
+      };
+      fetchAddresses();
+    }
+  }, [user]);
 
   const subtotal = cart.reduce((acc, item) => acc + (parseInt(item.price.replace(/[^\d]/g, '')) * item.quantity), 0);
 
@@ -19,6 +50,11 @@ export default function PaymentPage() {
     e.preventDefault();
     if (!user) {
       router.push('/login');
+      return;
+    }
+
+    if (!selectedAddress) {
+      alert("Please select or add a delivery address.");
       return;
     }
 
@@ -37,7 +73,15 @@ export default function PaymentPage() {
           createdAt: serverTimestamp(),
           status: 'Processing',
           paymentMethod: paymentMethod,
-          totalAmount: subtotal
+          totalAmount: subtotal,
+          deliveryAddress: {
+            fullName: selectedAddress.fullName,
+            phone: selectedAddress.phone,
+            addressLine: selectedAddress.addressLine,
+            city: selectedAddress.city,
+            state: selectedAddress.state,
+            pincode: selectedAddress.pincode
+          }
         });
       }
 
@@ -65,8 +109,49 @@ export default function PaymentPage() {
       <h1 className="text-3xl font-black uppercase tracking-tighter text-center">Payment</h1>
       
       <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Payment Form */}
-        <div className="space-y-8">
+        {/* Left Column: Address and Payment */}
+        <div className="space-y-12">
+          {/* Address Selection */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-black uppercase tracking-tight">Delivery Address</h2>
+              <Link href="/profile/addresses" className="text-xs font-bold uppercase tracking-widest text-zinc-500 underline underline-offset-4">Manage</Link>
+            </div>
+            
+            {addresses.length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-zinc-200 p-8 text-center">
+                <p className="text-sm font-bold text-zinc-500 uppercase mb-4">No addresses saved</p>
+                <Link href="/profile/addresses" className="inline-block rounded-full bg-black px-6 py-2 text-[10px] font-black text-white uppercase tracking-widest">Add Address</Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {addresses.map((address) => (
+                  <label key={address.id} className={`block p-4 border-2 rounded-2xl cursor-pointer transition-all ${selectedAddress?.id === address.id ? 'border-black bg-zinc-50' : 'border-zinc-100 hover:border-zinc-200'}`}>
+                    <div className="flex items-start gap-4">
+                      <input 
+                        type="radio" 
+                        name="address" 
+                        checked={selectedAddress?.id === address.id}
+                        onChange={() => setSelectedAddress(address)}
+                        className="mt-1 size-4 accent-black"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-sm uppercase tracking-tight">{address.fullName}</span>
+                          {address.isDefault && <span className="bg-zinc-200 px-1.5 py-0.5 rounded text-[8px] font-black uppercase">Default</span>}
+                        </div>
+                        <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                          {address.addressLine}, {address.city}, {address.state} - {address.pincode}
+                        </p>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-tighter">Phone: {address.phone}</p>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </section>
+
           <div>
             <h2 className="text-lg font-black uppercase tracking-tight mb-4">Select Payment Method</h2>
             <div className="space-y-3">

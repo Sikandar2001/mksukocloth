@@ -182,7 +182,7 @@ export default function Home() {
         return matchesCat && p.childSubCategory?.toLowerCase() === activeWomenChildCategory.toLowerCase();
       }).slice(0, 4);
   return (
-    <main className="w-full bg-white font-lexend">
+    <main className="w-full bg-white font-lexend" suppressHydrationWarning>
       {/* Hero Section - Image Slider */}
       <HeroSlider />
 

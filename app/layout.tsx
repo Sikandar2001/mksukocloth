@@ -35,7 +35,7 @@ export default function RootLayout({
           <WishlistProvider>
             <CartProvider>
               <Header />
-              <div className="flex-1">{children}</div>
+              <div className="flex-1" suppressHydrationWarning>{children}</div>
               <Footer />
             </CartProvider>
           </WishlistProvider>

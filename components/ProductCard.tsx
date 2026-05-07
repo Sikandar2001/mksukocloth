@@ -10,14 +10,19 @@ type Product = {
   href?: string;
 };
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useWishlist } from "@/app/context/WishlistContext";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const isFavorite = isInWishlist(product.id);
+  const [mounted, setMounted] = useState(false);
+  const isFavorite = mounted ? isInWishlist(product.id) : false;
   const [currentImage, setCurrentImage] = useState(product.image);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -38,7 +43,7 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative">
+    <div className="group relative" suppressHydrationWarning>
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#F5F5F5] rounded-none">
         {product.href ? (
           <Link href={product.href} className="block h-full relative">

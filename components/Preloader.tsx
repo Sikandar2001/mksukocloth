@@ -33,7 +33,10 @@ export default function Preloader() {
   if (!isVisible) return null;
 
   return (
-    <div className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black transition-opacity duration-1000 ${count === 100 ? 'opacity-0' : 'opacity-100'}`}>
+    <div 
+      suppressHydrationWarning
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black transition-opacity duration-1000 ${count === 100 ? 'opacity-0' : 'opacity-100'}`}
+    >
       <div className="flex flex-col items-center">
         <h1 className="mb-4 text-5xl font-black tracking-tighter text-white md:text-8xl">
           MKSUKO

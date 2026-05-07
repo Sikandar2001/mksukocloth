@@ -16,8 +16,13 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ products: any[], categories: any[] }>({ products: [], categories: [] });
   const [isSearching, setIsSearching] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Fetch and search logic
   useEffect(() => {
@@ -97,7 +102,7 @@ export default function Header() {
   }, [open, isSearchOpen]);
 
   return (
-    <header className="w-full border-b border-black/10 font-lexend">
+    <header className="w-full border-b border-black/10 font-lexend" suppressHydrationWarning>
       <div className="relative mx-auto flex h-14 max-w-7xl items-center px-4">
         <div className="flex items-center gap-2 sm:gap-6">
           <button
@@ -155,7 +160,7 @@ export default function Header() {
         </div>
 
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none flex flex-col items-center leading-none text-black">
-          <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">MKSUKO</span>
+          <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">MKSS-LIFE</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-5 text-sm">
@@ -180,11 +185,11 @@ export default function Header() {
           <span className="hidden font-semibold sm:inline">EN</span>
           
           <Link 
-            href={user ? "/profile" : "/login"} 
-            className={`hidden rounded p-1 transition-colors hover:bg-black/5 sm:block ${user ? "text-black" : "text-zinc-600"}`} 
-            aria-label={user ? "Profile" : "Account login"}
+            href={mounted && user ? "/profile" : "/login"} 
+            className={`hidden rounded p-1 transition-colors hover:bg-black/5 sm:block ${mounted && user ? "text-black" : "text-zinc-600"}`} 
+            aria-label={mounted && user ? "Profile" : "Account login"}
           >
-            {user ? (
+            {mounted && user ? (
               /* Logged in icon: Filled user circle or initials */
               <div className="flex size-5 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white sm:size-6">
                 {user.displayName ? user.displayName[0].toUpperCase() : user.email ? user.email[0].toUpperCase() : "U"}
@@ -236,7 +241,7 @@ export default function Header() {
               <circle cx="9" cy="20" r="1.5" />
               <circle cx="18" cy="20" r="1.5" />
             </svg>
-            {cartCount > 0 && (
+            {mounted && cartCount > 0 && (
               <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {cartCount}
               </span>
@@ -291,7 +296,7 @@ export default function Header() {
               ))}
             </ul>
             <div className="mt-auto border-t p-5">
-              {user ? (
+              {mounted && user ? (
                 <div className="space-y-4">
                   <Link 
                     href="/profile" 
@@ -317,7 +322,7 @@ export default function Header() {
                     Track Orders
                   </Link>
                 </div>
-              ) : (
+              ) : mounted ? (
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
@@ -325,7 +330,7 @@ export default function Header() {
                 >
                   LOG IN / SIGN UP
                 </Link>
-              )}
+              ) : null}
             </div>
           </div>
         </>

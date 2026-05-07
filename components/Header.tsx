@@ -160,7 +160,7 @@ export default function Header() {
         </div>
 
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 select-none flex flex-col items-center leading-none text-black">
-          <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">MKSS-LIFE</span>
+          <span className="text-xl font-black tracking-[0.2em] sm:text-2xl sm:tracking-[0.3em]">NukFu</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2 sm:gap-5 text-sm">

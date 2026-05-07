@@ -76,19 +76,8 @@ export default function HeroSlider() {
               alt={slide.title}
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/30" />
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6">
-              <h1 className="text-4xl font-black tracking-tighter sm:text-7xl lg:text-8xl uppercase leading-none animate-reveal">
-                {slide.title.split(" ").map((word, i) => (
-                  <span key={i}>
-                    {word} {i === 0 && slide.title.split(" ").length > 1 && <br className="sm:hidden" />}
-                  </span>
-                ))}
-              </h1>
-              <p className="mt-4 text-sm font-bold tracking-widest uppercase opacity-90 sm:text-lg lg:text-xl animate-reveal" style={{ animationDelay: '0.2s' }}>
-                {slide.subtitle}
-              </p>
-              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6 animate-reveal" style={{ animationDelay: '0.4s' }}>
+              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6 animate-reveal">
                 <Link
                   href={slide.cta1Link}
                   className="w-48 rounded-full bg-white px-8 py-4 text-xs font-black tracking-widest text-black transition-all hover:bg-black hover:text-white sm:w-auto"

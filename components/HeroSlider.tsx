@@ -76,22 +76,6 @@ export default function HeroSlider() {
               alt={slide.title}
               className="h-full w-full object-cover"
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white p-6">
-              <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:gap-6 animate-reveal">
-                <Link
-                  href={slide.cta1Link}
-                  className="w-48 rounded-full bg-white px-8 py-4 text-xs font-black tracking-widest text-black transition-all hover:bg-black hover:text-white sm:w-auto"
-                >
-                  {slide.cta1}
-                </Link>
-                <Link
-                  href={slide.cta2Link}
-                  className="w-48 rounded-full border-2 border-white px-8 py-3.5 text-xs font-black tracking-widest text-white backdrop-blur-sm transition-all hover:bg-white hover:text-black sm:w-auto"
-                >
-                  {slide.cta2}
-                </Link>
-              </div>
-            </div>
           </div>
         ))}
 

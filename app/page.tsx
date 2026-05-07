@@ -191,7 +191,7 @@ export default function Home() {
 
       {/* NEW: Live In Denim Section (Static Banner) */}
       <section className="mt-12 w-full font-lexend">
-        <div className="relative aspect-[1/1] w-full overflow-hidden bg-zinc-100 sm:aspect-[21/7]">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-100 sm:aspect-[21/6]">
           <img
             src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=2000&auto=format&fit=crop"
             alt="Live In Denim"
@@ -199,16 +199,16 @@ export default function Home() {
           />
           
           {/* Text Overlays matching user image */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-black font-black uppercase tracking-[0.3em] text-sm sm:text-base opacity-60">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-black font-black uppercase tracking-[0.3em] text-[10px] sm:text-xs opacity-60">
             RELAXED
           </div>
 
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <div className="text-center">
-              <h2 className="text-5xl font-[1000] leading-[0.85] tracking-tighter text-white uppercase sm:text-[120px]">
+              <h2 className="text-4xl font-[1000] leading-[0.85] tracking-tighter text-white uppercase sm:text-[90px]">
                 LIVE IN <br /> DENIM
               </h2>
-              <p className="mt-6 text-sm font-black uppercase tracking-[0.25em] text-white/90 sm:text-lg">
+              <p className="mt-4 text-[10px] font-black uppercase tracking-[0.25em] text-white/90 sm:mt-6 sm:text-sm">
                 MUST HAVE DENIMS
               </p>
             </div>
